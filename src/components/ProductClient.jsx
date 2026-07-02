@@ -687,19 +687,76 @@ export default function ProductClient({ id }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left: Gallery */}
             <MotionReveal className="lg:-mt-12" index={0} y={18}>
-              <div className="relative aspect-[3/4] overflow-hidden bg-transparent">
-                {images.every((src) => src === "placeholder") ? (
+              {images.every((src) => src === "placeholder") ? (
+                <div className="relative aspect-[3/4] overflow-hidden bg-transparent">
                   <div className="w-full h-full bg-[--color-soft] flex items-center justify-center text-muted">
                     <span>{t(locale, "product.image")}</span>
                   </div>
-                ) : (
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+                  <div className="order-2 flex w-full items-center gap-2 overflow-x-auto no-scrollbar lg:order-1 lg:h-[clamp(22rem,52vw,34rem)] lg:w-[76px] lg:flex-col lg:items-stretch lg:overflow-y-auto lg:overflow-x-hidden lg:pr-1">
+                    <button
+                      type="button"
+                      onClick={() => scrollThumbs(-1)}
+                      disabled={!canScrollUp}
+                      aria-label="Scroll thumbnails up"
+                      className="hidden h-8 w-full items-center justify-center rounded-sm border border-line bg-white text-ink transition-colors hover:border-[--color-muted] disabled:cursor-not-allowed disabled:opacity-40 lg:flex"
+                    >
+                      <ChevronUp size={16} />
+                    </button>
+
+                    <div
+                      ref={thumbsRef}
+                      className="flex w-full gap-2 overflow-x-auto no-scrollbar lg:min-h-0 lg:flex-1 lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden"
+                    >
+                      {images.map((src, idx) => (
+                        <button
+                          key={`${src}-${idx}`}
+                          type="button"
+                          onClick={() => {
+                            setActiveIdx(idx);
+                            setLightboxIdx(idx);
+                          }}
+                          onMouseEnter={() => setActiveIdx(idx)}
+                          onFocus={() => setActiveIdx(idx)}
+                          aria-label={t(locale, "product.imageN").replace("{n}", String(idx + 1))}
+                          className={`relative group h-20 w-14 shrink-0 overflow-hidden rounded-sm border bg-[--color-soft] transition-colors lg:h-20 lg:w-full ${idx === activeIdx ? "border-[--color-accent]" : "border-line hover:border-[--color-muted]"}`}
+                        >
+                          <span className="relative block h-full w-full overflow-hidden">
+                            <Image
+                              src={src}
+                              alt={`${product.name} thumbnail ${idx + 1}`}
+                              fill
+                              referrerPolicy="no-referrer"
+                              loading="lazy"
+                              sizes="96px"
+                              className="object-contain"
+                            />
+                          </span>
+                          <span aria-hidden className="pointer-events-none absolute inset-0 rounded-sm ring-2 ring-[var(--color-ink)] opacity-0 transition-opacity group-hover:opacity-100" />
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => scrollThumbs(1)}
+                      disabled={!canScrollDown}
+                      aria-label="Scroll thumbnails down"
+                      className="hidden h-8 w-full items-center justify-center rounded-sm border border-line bg-white text-ink transition-colors hover:border-[--color-muted] disabled:cursor-not-allowed disabled:opacity-40 lg:flex"
+                    >
+                      <ChevronDown size={16} />
+                    </button>
+                  </div>
+
                   <button
                     type="button"
                     onClick={() => {
                       setLightboxIdx(activeIdx);
                       setLightboxOpen(true);
                     }}
-                    className="relative block w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-ink] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                    className="order-1 relative block aspect-[3/4] w-full overflow-hidden bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-ink] focus-visible:ring-offset-2 focus-visible:ring-offset-white lg:order-2"
                     onMouseEnter={() => setAutoPlay(true)}
                     onMouseLeave={() => setAutoPlay(false)}
                     aria-label={`${t(locale, "product.openImage")} — ${product.name}`}
@@ -719,8 +776,8 @@ export default function ProductClient({ id }) {
                       className={galleryImageClassName}
                     />
                   </button>
-                )}
-              </div>
+                </div>
+              )}
 
               {shouldShowInbank ? (
                 <div className="mt-2 w-full max-w-none lg:mt-0 lg:max-w-[760px]">

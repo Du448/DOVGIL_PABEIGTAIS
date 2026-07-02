@@ -214,16 +214,18 @@ h3 {
   color: var(--color-ink);
 }
 .container {
-  margin-left: auto;
-  margin-right: auto;
-  width: 100% !important;
-  max-width: none !important;
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
   padding-left: var(--container-padding);
   padding-right: var(--container-padding);
 }
-.page-home .container {
-  max-width: none;
+.container-full {
   width: 100%;
+  max-width: none;
+  margin-inline: auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
 }
 section { padding-block: var(--section-y); }
 .section-soft { background-color: var(--color-soft); }
