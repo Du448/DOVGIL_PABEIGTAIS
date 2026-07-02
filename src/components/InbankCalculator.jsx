@@ -168,7 +168,7 @@ export default function InbankCalculator({ price, locale }) {
         inFlightKeyRef.current = "";
       }
     };
-  }, [price, locale]);
+  }, [initKey, locale, normalizedPrice, productCode, shouldRender, shopUuid]);
 
   if (!shouldRender) {
     return null;

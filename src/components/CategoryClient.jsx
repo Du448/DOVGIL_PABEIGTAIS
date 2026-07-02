@@ -231,7 +231,7 @@ export default function CategoryClient({ slug }) {
     "sleptas-durvis",
   ];
 
-  const typeTitle = locale === "lt" ? "Durų tipas" : locale === "en" ? "Door type" : "Durvju tips";
+  const typeTitle = t(locale, "category.doorTypeTitle");
 
   const labelForSlug = (s) => {
     const k1 = t(locale, `categories.details.${s}.name`);
@@ -242,7 +242,7 @@ export default function CategoryClient({ slug }) {
     return fromData || s;
   };
 
-  const searchPlaceholder = locale === "lt" ? "Ieškoti..." : locale === "en" ? "Search..." : "Meklēt...";
+  const searchPlaceholder = t(locale, "category.searchPlaceholder");
   const collectionQuery = collectionSearch.trim().toLowerCase();
   const colorQuery = colorSearch.trim().toLowerCase();
   const filteredCollections = collectionOptions.filter((c) => c.toLowerCase().includes(collectionQuery));
@@ -519,7 +519,7 @@ export default function CategoryClient({ slug }) {
 
   return (
     <main>
-      <section className="border-b border-line" style={{ paddingBlockStart: '2rem', paddingBlockEnd: '1.75rem' }}>
+      <section className="hidden border-b border-line md:block" style={{ paddingBlockStart: '2rem', paddingBlockEnd: '1.75rem' }}>
         <div className="container max-w-[1280px]">
           <div className="flex items-center gap-1.5 text-xs text-muted tracking-wide">
             <Link className="hover:text-[--color-accent] transition-colors duration-150" href={withLocaleHref(locale, "/")}>{t(locale, "common.home")}</Link>
@@ -535,7 +535,7 @@ export default function CategoryClient({ slug }) {
 
       <section className="-mt-1" style={{ paddingBlockStart: '1.25rem' }}>
         <div className="container max-w-[1280px] pt-0 pb-6">
-          <div className="mb-0 flex flex-col gap-3">
+          <div className="mb-0 flex min-h-[112px] flex-col gap-3 md:min-h-0">
             <div className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex w-max min-w-full items-center gap-2">
                 {quickFilters.map((filter) => (
@@ -546,7 +546,7 @@ export default function CategoryClient({ slug }) {
                     disabled={filter.disabled}
                     onClick={filter.onClick}
                     className={cn(
-                      "inline-flex min-h-10 items-center rounded-full border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-200",
+                      "inline-flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-200",
                       filter.active
                         ? "border-primary bg-primary text-primary-foreground shadow-sm"
                         : "border-border bg-background text-foreground hover:bg-muted",
@@ -608,56 +608,56 @@ export default function CategoryClient({ slug }) {
               {selectedCollections.map((c) => (
                 <Badge key={`col-${c}`} variant="secondary" className="gap-2">
                   {c}
-                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="ml-1 text-muted-foreground" onClick={() => toggleMultiValueParam("kolekcija", selectedCollections, c)}>×</button>
+                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="-mr-1 -my-1 inline-flex h-11 w-11 items-center justify-center text-muted-foreground" onClick={() => toggleMultiValueParam("kolekcija", selectedCollections, c)}>×</button>
                 </Badge>
               ))}
               {isAnthraciteActive ? (
                 <Badge variant="secondary" className="gap-2">
                   {t(locale, "category.quickFilterAnthracite")}
-                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="ml-1 text-muted-foreground" onClick={() => setMultiValueParam("krasa", [])}>×</button>
+                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="-mr-1 -my-1 inline-flex h-11 w-11 items-center justify-center text-muted-foreground" onClick={() => setMultiValueParam("krasa", [])}>×</button>
                 </Badge>
               ) : (
                 selectedColors.map((c) => (
                   <Badge key={`clr-${c}`} variant="secondary" className="gap-2">
                     {translateColorLabel(c)}
-                    <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="ml-1 text-muted-foreground" onClick={() => toggleMultiValueParam("krasa", selectedColors, c)}>×</button>
+                    <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="-mr-1 -my-1 inline-flex h-11 w-11 items-center justify-center text-muted-foreground" onClick={() => toggleMultiValueParam("krasa", selectedColors, c)}>×</button>
                   </Badge>
                 ))
               )}
               {priceMin !== "" && (
                 <Badge variant="secondary" className="gap-2">
                   {t(locale, "category.from")} €{priceMin}
-                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="ml-1 text-muted-foreground" onClick={() => setSingleValueParam("cena_no", "")}>×</button>
+                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="-mr-1 -my-1 inline-flex h-11 w-11 items-center justify-center text-muted-foreground" onClick={() => setSingleValueParam("cena_no", "")}>×</button>
                 </Badge>
               )}
               {priceMax !== "" && (
                 <Badge variant="secondary" className="gap-2">
                   {t(locale, "category.to")} €{priceMax}
-                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="ml-1 text-muted-foreground" onClick={() => setSingleValueParam("cena_lidz", "")}>×</button>
+                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="-mr-1 -my-1 inline-flex h-11 w-11 items-center justify-center text-muted-foreground" onClick={() => setSingleValueParam("cena_lidz", "")}>×</button>
                 </Badge>
               )}
               {thermoFilter !== "all" && (
                 <Badge variant="secondary" className="gap-2">
                   {t(locale, "category.thermo")}: {thermoFilter === "yes" ? t(locale, "category.yes") : t(locale, "category.no")}
-                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="ml-1 text-muted-foreground" onClick={() => setSingleValueParam("termo", "all", "all")}>×</button>
+                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="-mr-1 -my-1 inline-flex h-11 w-11 items-center justify-center text-muted-foreground" onClick={() => setSingleValueParam("termo", "all", "all")}>×</button>
                 </Badge>
               )}
               {glassOnly ? (
                 <Badge variant="secondary" className="gap-2">
                   {t(locale, "category.quickFilterGlass")}
-                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="ml-1 text-muted-foreground" onClick={() => setSingleValueParam("stikls", "")}>×</button>
+                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="-mr-1 -my-1 inline-flex h-11 w-11 items-center justify-center text-muted-foreground" onClick={() => setSingleValueParam("stikls", "")}>×</button>
                 </Badge>
               ) : null}
               {newOnly ? (
                 <Badge variant="secondary" className="gap-2">
                   {t(locale, "category.quickFilterNew")}
-                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="ml-1 text-muted-foreground" onClick={() => setSingleValueParam("jaunumi", "")}>×</button>
+                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="-mr-1 -my-1 inline-flex h-11 w-11 items-center justify-center text-muted-foreground" onClick={() => setSingleValueParam("jaunumi", "")}>×</button>
                 </Badge>
               ) : null}
               {clearanceOnly ? (
                 <Badge variant="secondary" className="gap-2">
                   {t(locale, "category.quickFilterSale")}
-                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="ml-1 text-muted-foreground" onClick={() => setSingleValueParam("akcija", "")}>×</button>
+                  <button aria-label={t(locale, "a11y.removeFilter") || "Noņemt filtru"} className="-mr-1 -my-1 inline-flex h-11 w-11 items-center justify-center text-muted-foreground" onClick={() => setSingleValueParam("akcija", "")}>×</button>
                 </Badge>
               ) : null}
               {hasActiveFilters ? (
@@ -676,7 +676,12 @@ export default function CategoryClient({ slug }) {
                 >
                   {filtered.slice(0, visibleCount).map((p, i) => (
                     <MotionReveal key={p.id} index={i}>
-                      <ProductCard product={p} variant="catalog" />
+                      <ProductCard
+                        product={p}
+                        variant="catalog"
+                        imagePriority={i < 4}
+                        imageSizes="(max-width: 768px) 50vw, 25vw"
+                      />
                     </MotionReveal>
                   ))}
                 </RevealGrid>
@@ -690,7 +695,7 @@ export default function CategoryClient({ slug }) {
                         setVisibleCount((c) => c + 16);
                       }}
                     >
-                      VAIRĀK
+                      {t(locale, "category.loadMore")}
                     </Button>
                   </div>
                 ) : null}

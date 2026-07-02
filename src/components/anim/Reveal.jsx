@@ -23,7 +23,7 @@ export default function Reveal({
   }, []);
 
   useEffect(() => {
-    if (prefersReduced) { setVisible(true); return; }
+    if (prefersReduced) return;
     const el = ref.current;
     if (!el) return;
     const io = new IntersectionObserver((entries) => {

@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { useCompare } from "@/lib/compare";
 import { useRfq } from "@/lib/rfq";
 
-export default function ProductCard({ product, variant = "default" }) {
+export default function ProductCard({ product, variant = "default", imagePriority = false, imageSizes }) {
   const locale = getLocaleFromPathname(usePathname());
   const [wishlisted, setWishlisted] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -46,6 +46,8 @@ export default function ProductCard({ product, variant = "default" }) {
   const discount = hasOffer
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : 0;
+  const resolvedImageSizes =
+    imageSizes || (isCatalogVariant ? "(max-width: 768px) 50vw, 25vw" : "(max-width: 768px) 100vw, 25vw");
 
   return (
     <Link
@@ -72,7 +74,8 @@ export default function ProductCard({ product, variant = "default" }) {
               src={ikSrc(product.images[activeIdx], { w: 600 })}
               alt={product.name}
               fill
-              sizes={isCatalogVariant ? "(max-width: 768px) 100vw, (max-width: 1280px) 33vw, 25vw" : "(max-width: 768px) 100vw, 25vw"}
+              priority={imagePriority}
+              sizes={resolvedImageSizes}
               className="object-contain transition-transform duration-500 ease-out will-change-transform group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
           </div>
@@ -95,9 +98,11 @@ export default function ProductCard({ product, variant = "default" }) {
                   e.stopPropagation();
                   setQuickOpen(true);
                 }}
-                className="rounded-full border border-line/70 bg-white/85 p-2 text-ink shadow-sm transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-premium"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink"
               >
-                <Eye size={18} />
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-line/70 bg-white/85 text-ink shadow-sm transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-premium">
+                  <Eye size={18} />
+                </span>
               </button>
             </DialogTrigger>
             <DialogContent className="overflow-hidden sm:max-w-[720px]" onClick={(e) => e.stopPropagation()}>
@@ -181,7 +186,7 @@ export default function ProductCard({ product, variant = "default" }) {
           <button
             type="button"
             aria-label="Salīdzināt"
-            className={`inline-flex items-center justify-center rounded-full border p-2 transition-[background-color,border-color,transform] duration-200 ${has(product.id) ? "border-[--color-accent] bg-white text-accent" : "border-line bg-white/85 text-ink hover:-translate-y-0.5 hover:border-[color-mix(in_oklch,var(--border),var(--foreground)_12%)] hover:bg-white"}`}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -189,7 +194,9 @@ export default function ProductCard({ product, variant = "default" }) {
               toggle(product.id);
             }}
           >
-            <Layers size={18} />
+            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full border p-2 transition-[background-color,border-color,transform] duration-200 ${has(product.id) ? "border-[--color-accent] bg-white text-accent" : "border-line bg-white/85 text-ink hover:-translate-y-0.5 hover:border-[color-mix(in_oklch,var(--border),var(--foreground)_12%)] hover:bg-white"}`}>
+              <Layers size={18} />
+            </span>
           </button>
         </div>
         {/* Thumbnails on hover */}
@@ -224,7 +231,7 @@ export default function ProductCard({ product, variant = "default" }) {
         <button
           type="button"
           aria-label={t(locale, "a11y.addWishlist")}
-          className={`absolute right-2 top-2 rounded-full border border-line/70 bg-white/85 p-2 shadow-sm transition-[background-color,box-shadow,color,transform] duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-premium ${likeBump ? "scale-110" : ""} ${wishlisted ? "text-accent" : "text-ink"}`}
+          className="absolute right-2 top-2 inline-flex h-11 w-11 items-center justify-center rounded-full text-ink"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -233,7 +240,9 @@ export default function ProductCard({ product, variant = "default" }) {
             setTimeout(() => setLikeBump(false), 180);
           }}
         >
-          <Heart size={18} />
+          <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-line/70 bg-white/85 p-2 shadow-sm transition-[background-color,box-shadow,color,transform] duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-premium ${likeBump ? "scale-110" : ""} ${wishlisted ? "text-accent" : "text-ink"}`}>
+            <Heart size={18} />
+          </span>
         </button>
       </div>
 

@@ -1,18 +1,27 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "compare:ids";
 const MAX_ITEMS = 4;
+const EMPTY_COMPARE_IDS = [];
+let lastCompareRaw = null;
+let lastCompareIds = EMPTY_COMPARE_IDS;
 
 export function readCompareIds() {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") return EMPTY_COMPARE_IDS;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw === lastCompareRaw) return lastCompareIds;
+
     const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr.slice(0, MAX_ITEMS) : [];
+    lastCompareRaw = raw;
+    lastCompareIds = Array.isArray(arr) ? arr.slice(0, MAX_ITEMS) : EMPTY_COMPARE_IDS;
+    return lastCompareIds;
   } catch {
-    return [];
+    lastCompareRaw = null;
+    lastCompareIds = EMPTY_COMPARE_IDS;
+    return EMPTY_COMPARE_IDS;
   }
 }
 
@@ -36,17 +45,24 @@ const CompareContext = createContext({
 });
 
 export function CompareProvider({ children }) {
-  const [ids, setIds] = useState([]);
+  const ids = useSyncExternalStore(
+    useCallback((onStoreChange) => {
+      if (typeof window === "undefined") return () => {};
+      window.addEventListener("storage", onStoreChange);
+      window.addEventListener("compare:change", onStoreChange);
+      return () => {
+        window.removeEventListener("storage", onStoreChange);
+        window.removeEventListener("compare:change", onStoreChange);
+      };
+    }, []),
+    readCompareIds,
+    () => EMPTY_COMPARE_IDS
+  );
 
-  useEffect(() => {
-    setIds(readCompareIds());
-    const onChange = () => setIds(readCompareIds());
-    window.addEventListener("storage", onChange);
-    window.addEventListener("compare:change", onChange);
-    return () => {
-      window.removeEventListener("storage", onChange);
-      window.removeEventListener("compare:change", onChange);
-    };
+  const emitChange = useCallback(() => {
+    try {
+      window.dispatchEvent(new Event("compare:change"));
+    } catch {}
   }, []);
 
   const has = useCallback((id) => ids.includes(id), [ids]);
@@ -55,32 +71,32 @@ export function CompareProvider({ children }) {
     if (!id) return;
     if (ids.includes(id)) return;
     const next = [...ids, id].slice(0, MAX_ITEMS);
-    setIds(next);
     writeCompareIds(next);
-  }, [ids]);
+    emitChange();
+  }, [emitChange, ids]);
 
   const remove = useCallback((id) => {
     const next = ids.filter((x) => x !== id);
-    setIds(next);
     writeCompareIds(next);
-  }, [ids]);
+    emitChange();
+  }, [emitChange, ids]);
 
   const toggle = useCallback((id) => {
     if (ids.includes(id)) {
       const next = ids.filter((x) => x !== id);
-      setIds(next);
       writeCompareIds(next);
+      emitChange();
     } else if (ids.length < MAX_ITEMS) {
       const next = [...ids, id];
-      setIds(next);
       writeCompareIds(next);
+      emitChange();
     }
-  }, [ids]);
+  }, [emitChange, ids]);
 
   const clear = useCallback(() => {
-    setIds([]);
     writeCompareIds([]);
-  }, []);
+    emitChange();
+  }, [emitChange]);
 
   const value = useMemo(() => ({ ids, has, add, remove, toggle, clear, max: MAX_ITEMS }), [ids, has, add, remove, toggle, clear]);
 

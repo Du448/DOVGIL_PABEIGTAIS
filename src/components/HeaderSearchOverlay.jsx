@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Search } from "lucide-react";
 
 export default function HeaderSearchOverlay({
@@ -105,7 +106,7 @@ export default function HeaderSearchOverlay({
                             onClick={() => selectItem(item)}
                             className={`flex w-full items-center gap-3 px-3 py-2 text-left ${active ? "bg-soft" : "hover:bg-soft/70"}`}
                           >
-                            <img src={p.images?.[0]} alt="" className="h-9 w-9 rounded-sm object-cover border border-line" />
+                            <Image src={p.images?.[0]} alt="" width={36} height={36} className="h-9 w-9 rounded-sm border border-line object-cover" />
                             <div className="min-w-0 flex-1">
                               <div className="truncate text-[14px] text-ink">{p.name}</div>
                               <div className="truncate text-[12px] text-muted">{p.collection} • €{p.price}</div>

@@ -36,13 +36,15 @@ export default function ContactsClient() {
 
   // If product in query changes, re-enable autofill
   useEffect(() => {
-    setIsAutofilled(!!product);
+    const id = window.setTimeout(() => setIsAutofilled(!!product), 0);
+    return () => window.clearTimeout(id);
   }, [product]);
 
   // Update prefilled message when locale or product changes, if user hasn't edited it
   useEffect(() => {
     if (isAutofilled) {
-      setMessage(prefillMessage(locale, product));
+      const id = window.setTimeout(() => setMessage(prefillMessage(locale, product)), 0);
+      return () => window.clearTimeout(id);
     }
   }, [locale, product, isAutofilled]);
 

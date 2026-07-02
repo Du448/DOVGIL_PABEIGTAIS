@@ -178,18 +178,35 @@ export default function Header() {
 
   // Open suggestions while typing/focus
   useEffect(() => {
-    if (trimmedQ.length > 0) setOpenSuggest(true);
-    setActiveIndex(() => {
-      // set initial active to first non-section item
-      const idx = combined.findIndex((x) => x.type !== "section");
-      return idx >= 0 ? idx : -1;
-    });
-  }, [trimmedQ, combined.length]);
+    const nextIndex = combined.findIndex((x) => x.type !== "section");
+    const sync = () => {
+      if (trimmedQ.length > 0) setOpenSuggest(true);
+      setActiveIndex(nextIndex >= 0 ? nextIndex : -1);
+    };
+
+    if (typeof queueMicrotask === "function") {
+      queueMicrotask(sync);
+      return;
+    }
+
+    const id = window.setTimeout(sync, 0);
+    return () => window.clearTimeout(id);
+  }, [trimmedQ, combined]);
 
   // Close on route change
   useEffect(() => {
-    setOpenSuggest(false);
-    setShowSearch(false);
+    const sync = () => {
+      setOpenSuggest(false);
+      setShowSearch(false);
+    };
+
+    if (typeof queueMicrotask === "function") {
+      queueMicrotask(sync);
+      return;
+    }
+
+    const id = window.setTimeout(sync, 0);
+    return () => window.clearTimeout(id);
   }, [pathname]);
 
   useEffect(() => {
@@ -329,7 +346,7 @@ export default function Header() {
                                 onClick={() => selectItem(item)}
                                 className={`flex w-full items-center gap-3 px-3 py-2 text-left ${active ? "bg-soft" : "hover:bg-soft/70"}`}
                               >
-                                <img src={p.images?.[0]} alt="" className="h-9 w-9 rounded-sm object-cover border border-line" />
+                                <Image src={p.images?.[0]} alt="" width={36} height={36} className="h-9 w-9 rounded-sm border border-line object-cover" />
                                 <div className="min-w-0 flex-1">
                                   <div className="truncate text-[14px] text-ink">{p.name}</div>
                                   <div className="truncate text-[12px] text-muted">{p.collection} • €{p.price}</div>
@@ -397,7 +414,7 @@ export default function Header() {
                   onClick={() => {
                     if (l !== locale) router.refresh();
                   }}
-                  className={`px-2 py-1 text-xs font-semibold tracking-wide ${l === locale ? "text-accent" : "text-ink"}`}
+                  className={`relative inline-flex min-h-11 min-w-11 items-center justify-center px-2 py-1 text-xs font-semibold tracking-wide ${l === locale ? "text-accent" : "text-ink"}`}
                   aria-label={t(locale, "a11y.language").replace("{code}", l.toUpperCase())}
                 >
                   {l.toUpperCase()}
@@ -492,7 +509,7 @@ export default function Header() {
                               onClick={() => selectItem(item)}
                               className={`flex w-full items-center gap-3 px-3 py-2 text-left ${active ? "bg-soft" : "hover:bg-soft/70"}`}
                             >
-                              <img src={p.images?.[0]} alt="" className="h-9 w-9 rounded-sm object-cover border border-line" />
+                              <Image src={p.images?.[0]} alt="" width={36} height={36} className="h-9 w-9 rounded-sm border border-line object-cover" />
                               <div className="min-w-0 flex-1">
                                 <div className="truncate text-[14px] text-ink">{p.name}</div>
                                 <div className="truncate text-[12px] text-muted">{p.collection} • €{p.price}</div>

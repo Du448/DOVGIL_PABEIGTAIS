@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Heart, Shield, ChevronUp, ChevronDown, Truck, Ruler, Wrench, ShieldCheck, ChevronRight, Layers } from "lucide-react";
 import AccordionItem from "@/components/anim/AccordionItem";
 import MagneticButton from "@/components/anim/MagneticButton";
@@ -19,6 +19,8 @@ import { useCompare } from "@/lib/compare";
 import { useRfq } from "@/lib/rfq";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const EMPTY_SERVICE_OPTIONS = [];
 
 const Lightbox = dynamic(() => import("./ProductLightbox"), { ssr: false, loading: () => null });
 const ProductClientInbankBlock = dynamic(() => import("./ProductClientInbankBlock"), {
@@ -416,19 +418,11 @@ export default function ProductClient({ id }) {
     return () => clearInterval(id);
   }, [autoPlay, images.length, slideDir]);
 
-  if (!product) {
-    return (
-      <main className="container py-10">
-        <div className="text-ink">{t(locale, "product.notFound")}</div>
-      </main>
-    );
-  }
-
-  const hasOffer = product.oldPrice != null && product.oldPrice > product.price;
+  const hasOffer = product?.oldPrice != null && product.oldPrice > product.price;
   const discount = hasOffer ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100) : 0;
-  const similar = getProductsByCategory(product.category).filter((p) => p.id !== product.id).slice(0, 4);
-  const descriptionSections = product.descriptionSections || { specification: "", set: "" };
-  const serviceOptions = product.serviceOptions || [];
+  const similar = product ? getProductsByCategory(product.category).filter((p) => p.id !== product.id).slice(0, 4) : [];
+  const descriptionSections = product?.descriptionSections || { specification: "", set: "" };
+  const serviceOptions = product?.serviceOptions || EMPTY_SERVICE_OPTIONS;
   const [measurementCity, setMeasurementCity] = useState(measurementCityOptions[0]?.id || "");
   const [deliveryCity, setDeliveryCity] = useState(deliveryCityOptions[0]?.id || "");
   const [installationCity, setInstallationCity] = useState(deliveryInstallationCityOptions[0]?.id || "");
@@ -441,13 +435,24 @@ export default function ProductClient({ id }) {
   const [showPricesWithoutVat, setShowPricesWithoutVat] = useState(false);
 
   useEffect(() => {
-    setMeasurementCity(measurementCityOptions[0]?.id || "");
-    setDeliveryCity(deliveryCityOptions[0]?.id || "");
-    setInstallationCity(deliveryInstallationCityOptions[0]?.id || "");
-    setInstallationSelections(Object.fromEntries(deliveryInstallationFieldOptions.map((field) => [field.id, field.defaultValue])));
-    setServiceSelections(Object.fromEntries(serviceOptions.map((option) => [option.id, false])));
-    setShowPricesWithoutVat(false);
-  }, [product?.id]);
+    if (!product?.id) return;
+    const run = () => {
+      setMeasurementCity(measurementCityOptions[0]?.id || "");
+      setDeliveryCity(deliveryCityOptions[0]?.id || "");
+      setInstallationCity(deliveryInstallationCityOptions[0]?.id || "");
+      setInstallationSelections(Object.fromEntries(deliveryInstallationFieldOptions.map((field) => [field.id, field.defaultValue])));
+      setServiceSelections(Object.fromEntries(serviceOptions.map((option) => [option.id, false])));
+      setShowPricesWithoutVat(false);
+    };
+
+    if (typeof queueMicrotask === "function") {
+      queueMicrotask(run);
+      return;
+    }
+
+    const id = window.setTimeout(run, 0);
+    return () => window.clearTimeout(id);
+  }, [product?.id, serviceOptions]);
 
   const selectedInstallationCity = deliveryInstallationCityOptions.find((city) => city.id === installationCity) || deliveryInstallationCityOptions[0];
   const selectedMeasurementCity = measurementCityOptions.find((city) => city.id === measurementCity) || measurementCityOptions[0];
@@ -464,8 +469,16 @@ export default function ProductClient({ id }) {
   const installationLaborTotal = isDeliveryInstallationSelected ? (selectedInstallationCity?.price || 0) + installationLaborExtras : 0;
   const installationAccessoryTotalSelected = isDeliveryInstallationSelected ? installationAccessoryTotal : 0;
   const installationSummaryTotal =
-    product.price + measurementServiceTotal + deliveryOnlyServiceTotal + installationLaborTotal + installationAccessoryTotalSelected;
+    (product?.price || 0) + measurementServiceTotal + deliveryOnlyServiceTotal + installationLaborTotal + installationAccessoryTotalSelected;
   const vatMultiplier = showPricesWithoutVat ? 1 / 1.21 : 1;
+
+  if (!product) {
+    return (
+      <main className="container py-10">
+        <div className="text-ink">{t(locale, "product.notFound")}</div>
+      </main>
+    );
+  }
 
   const specLabelKeys = {
     "Vērtnes biezums": "specs.leafThickness",
@@ -721,7 +734,7 @@ export default function ProductClient({ id }) {
                       type="button"
                       onClick={() => scrollThumbs(-1)}
                       disabled={!canScrollUp}
-                      aria-label="Scroll thumbnails up"
+                      aria-label={t(locale, "a11y.galleryScrollUp")}
                       className="hidden h-8 w-full items-center justify-center rounded-sm border border-line bg-white text-ink transition-colors hover:border-[--color-muted] disabled:cursor-not-allowed disabled:opacity-40 lg:flex"
                     >
                       <ChevronUp size={16} />
@@ -764,7 +777,7 @@ export default function ProductClient({ id }) {
                       type="button"
                       onClick={() => scrollThumbs(1)}
                       disabled={!canScrollDown}
-                      aria-label="Scroll thumbnails down"
+                      aria-label={t(locale, "a11y.galleryScrollDown")}
                       className="hidden h-8 w-full items-center justify-center rounded-sm border border-line bg-white text-ink transition-colors hover:border-[--color-muted] disabled:cursor-not-allowed disabled:opacity-40 lg:flex"
                     >
                       <ChevronDown size={16} />
@@ -859,8 +872,11 @@ export default function ProductClient({ id }) {
               {/* Sizes */}
               {product.sizes?.length ? (
                 <div className="mt-5">
-                  <div className="text-sm text-muted mb-2">{t(locale, "product.size")}</div>
+                  <label htmlFor={`size-select-${product.id}`} className="mb-2 block text-sm text-muted">
+                    {t(locale, "product.size")}
+                  </label>
                   <select
+                    id={`size-select-${product.id}`}
                     value={activeSize}
                     onChange={(e) => setActiveSize(e.target.value)}
                     className="min-h-11 rounded-sm border border-line bg-white px-3 py-2 text-[15px] text-ink transition-colors hover:border-[--color-muted] focus:outline-none focus:ring-2 focus:ring-[--color-accent]"
@@ -924,26 +940,30 @@ export default function ProductClient({ id }) {
               {/* Trust icons row */}
               <div className="mt-4 flex w-full items-center justify-between gap-2 sm:gap-3">
                 {[
-                  { key: "trust.measurement", label: t(locale, "trust.measurement") || "Uzmērīšana", Icon: Ruler },
-                  { key: "trust.installation", label: t(locale, "trust.installation") || "Montāža", Icon: Wrench },
-                  { key: "trust.warranty", label: t(locale, "trust.warranty") || "Garantija", Icon: ShieldCheck },
-                  { key: "trust.delivery", label: t(locale, "trust.delivery") || "Piegāde", Icon: Truck },
-                ].map(({ key, label, Icon }) => (
+                  { key: "trust.measurement", labelKey: "a11y.measurementInfo", Icon: Ruler },
+                  { key: "trust.installation", labelKey: "a11y.installationInfo", Icon: Wrench },
+                  { key: "trust.warranty", labelKey: "a11y.warrantyInfo", Icon: ShieldCheck },
+                  { key: "trust.delivery", labelKey: "a11y.deliveryInfo", Icon: Truck },
+                ].map(({ key, labelKey, Icon }) => {
+                  const label = t(locale, labelKey);
+
+                  return (
                   <Tooltip key={key}>
                     <TooltipTrigger asChild>
-                      <span
-                        tabIndex={0}
+                      <button
+                        type="button"
                         aria-label={label}
                         className="group inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line/70 bg-white/80 text-ink shadow-sm transition-all hover:-translate-y-0.5 hover:border-[--color-muted] hover:shadow-premium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-ink] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                       >
                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[--color-soft] transition-colors group-hover:bg-[--color-soft]">
                           <Icon size={16} />
                         </span>
-                      </span>
+                      </button>
                     </TooltipTrigger>
                     <TooltipContent side="top">{label}</TooltipContent>
                   </Tooltip>
-                ))}
+                  );
+                })}
               </div>
 
               <ProductClientInbankBlock price={product.price} locale={locale} />

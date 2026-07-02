@@ -14,6 +14,10 @@ import { ArrowRight, ChevronRight, Phone } from "lucide-react";
 import { withLocaleHref, t } from "@/lib/i18n";
 import { ikSrc } from "@/lib/imagekit";
 
+function formatTemplate(template, values) {
+  return template.replace(/\{(\w+)\}/g, (_, key) => values[key] ?? `{${key}}`);
+}
+
 export async function generateMetadata({ params }) {
   const { locale } = await params;
 
@@ -21,18 +25,8 @@ export async function generateMetadata({ params }) {
   const pathLt = "/lt";
   const pathLv = "/lv";
   const pathEn = "/en";
-  const title =
-    locale === "lv"
-      ? "DOVGIL — ārdurvis un iekšdurvis Latvijā"
-      : locale === "en"
-        ? "DOVGIL — exterior and interior doors in Latvia"
-        : "DOVGIL — lauko ir vidaus durys Latvijoje";
-  const description =
-    locale === "lv"
-      ? "DOVGIL: ārdurvis un iekšdurvis, profesionāla montāža un piegāde visā Latvijā. Plašs sortiments, konsultācijas un garantija."
-      : locale === "en"
-        ? "DOVGIL: exterior and interior doors, professional installation and delivery across Latvia. Wide assortment, consultations and warranty."
-        : "DOVGIL: lauko ir vidaus durys, profesionalus montavimas ir pristatymas visoje Latvijoje. Platus asortimentas, konsultacijos ir garantija.";
+  const title = t(locale, "home.meta.title");
+  const description = t(locale, "home.meta.description");
 
   return {
     title,
@@ -65,49 +59,44 @@ function formatSpotlightPrice(locale, price) {
 
 function getSpotlightContent(product, locale) {
   const specs = product.specs ?? {};
+  const spotlight = {
+    eyebrow: t(locale, "home.spotlight.eyebrow"),
+    viewLabel: t(locale, "home.spotlight.viewLabel"),
+    pricePrefix: t(locale, "home.spotlight.pricePrefix"),
+    altSuffix: t(locale, "home.spotlight.altSuffix"),
+  };
   const shared = {
-    eyebrow: locale === "lv" ? "Izcelts modelis" : locale === "en" ? "Spotlight model" : "Išskirtinis modelis",
-    viewLabel: locale === "lv" ? "Skatīt modeli" : locale === "en" ? "View model" : "Peržiūrėti modelį",
-    priceLabel:
-      locale === "lv"
-        ? `Cena no ${formatSpotlightPrice(locale, product.price)}`
-        : locale === "en"
-          ? `From ${formatSpotlightPrice(locale, product.price)}`
-          : `Kaina nuo ${formatSpotlightPrice(locale, product.price)}`,
+    eyebrow: spotlight.eyebrow,
+    viewLabel: spotlight.viewLabel,
+    priceLabel: `${spotlight.pricePrefix} ${formatSpotlightPrice(locale, product.price)}`,
   };
 
   switch (product.id) {
     case "boston-6012":
       return {
         ...shared,
-        tagline:
-          locale === "lv"
-            ? `Alumīnija termo durvis. ${specs["Siltumvadītspēja"]}. ${specs["Skaņas izolācija"]} klusums.`
-            : locale === "en"
-              ? `Aluminium thermal door. ${specs["Siltumvadītspēja"]}. ${specs["Skaņas izolācija"]} quiet.`
-              : `Aliuminio termo durys. ${specs["Siltumvadītspēja"]}. ${specs["Skaņas izolācija"]} tylos.`,
+        tagline: formatTemplate(t(locale, "home.spotlight.bostonTagline"), {
+          siltum: specs["Siltumvadītspēja"],
+          sound: specs["Skaņas izolācija"],
+        }),
         details: [shared.priceLabel, specs["Stikla pakete"], specs["Skaņas izolācija"]].filter(Boolean),
       };
     case "termix-adele":
       return {
         ...shared,
-        tagline:
-          locale === "lv"
-            ? `Termo durvis ar ${specs["Stikla pakete"]?.toLowerCase()}. ${specs["Kārbas biezums"]}. Nakts aizbīdnis.`
-            : locale === "en"
-              ? `Thermal door with ${specs["Stikla pakete"]?.toLowerCase()} glazing. ${specs["Kārbas biezums"]}. Night latch.`
-              : `Termo durys su ${specs["Stikla pakete"]?.toLowerCase()}. ${specs["Kārbas biezums"]}. Naktinis skląstis.`,
+        tagline: formatTemplate(t(locale, "home.spotlight.termixTagline"), {
+          glazing: specs["Stikla pakete"]?.toLowerCase(),
+          frame: specs["Kārbas biezums"],
+        }),
         details: [shared.priceLabel, specs["Kārbas biezums"], specs["Vērtnes biezums"]].filter(Boolean),
       };
     case "termotrend-gluds":
       return {
         ...shared,
-        tagline:
-          locale === "lv"
-            ? `Premium termo durvis. ${specs["Slēdzene"]}. ${specs["Vērtnes biezums"]} vērtne.`
-            : locale === "en"
-              ? `Premium thermal door. ${specs["Slēdzene"]}. ${specs["Vērtnes biezums"]} leaf.`
-              : `Premium termo durys. ${specs["Slēdzene"]}. ${specs["Vērtnes biezums"]} varčia.`,
+        tagline: formatTemplate(t(locale, "home.spotlight.termotrendTagline"), {
+          lock: specs["Slēdzene"],
+          leaf: specs["Vērtnes biezums"],
+        }),
         details: [shared.priceLabel, specs["Vērtnes biezums"], specs["Pildījums"]].filter(Boolean),
       };
     default:
@@ -191,12 +180,7 @@ export default async function Home({ params }) {
       name: product.name,
       short: product.short,
       image: product.images?.[0] || "/next.svg",
-      alt:
-        locale === "lv"
-          ? `${product.name} — premium durvju modelis reālā vidē`
-          : locale === "en"
-            ? `${product.name} — premium door model in a real setting`
-            : `${product.name} — aukštos klasės durų modelis tikroje aplinkoje`,
+      alt: `${product.name} — ${spotlightContent.altSuffix}`,
       eyebrow: spotlightContent.eyebrow,
       viewLabel: spotlightContent.viewLabel,
       tagline: spotlightContent.tagline,
@@ -247,30 +231,14 @@ export default async function Home({ params }) {
     },
   ];
 
-  const faqIntroTitle = locale === "lv" ? "Biežāk uzdotie jautājumi" : "Frequently asked questions";
-  const faqIntroText =
-    locale === "lv"
-      ? "Ātras un skaidras atbildes par svarīgākajiem jautājumiem."
-      : "Clear, quick answers to the questions people ask most.";
+  const faqIntroTitle = t(locale, "home.faqIntroTitle");
+  const faqIntroText = t(locale, "home.faqIntroText");
 
-  const bottomLinks =
-    locale === "lt"
-      ? [
-          { href: withLocaleHref(locale, "/kontakti"), label: "Gauti nemokamą konsultaciją →" },
-          { href: withLocaleHref(locale, "/kontakti#salons"), label: "Aplankyti saloną Rygoje →" },
-          { href: withLocaleHref(locale, "/#kategorijas"), label: "Peržiūrėti visą asortimentą →" },
-        ]
-      : locale === "en"
-        ? [
-            { href: withLocaleHref(locale, "/kontakti"), label: "Request a free consultation →" },
-            { href: withLocaleHref(locale, "/kontakti#salons"), label: "Visit the showroom in Riga →" },
-            { href: withLocaleHref(locale, "/#kategorijas"), label: "View the full assortment →" },
-          ]
-        : [
-            { href: withLocaleHref(locale, "/kontakti"), label: "Pieprasīt bezmaksas konsultāciju →" },
-            { href: withLocaleHref(locale, "/kontakti#salons"), label: "Apmeklēt salonu Rīgā →" },
-            { href: withLocaleHref(locale, "/#kategorijas"), label: "Skatīt visu sortimentu →" },
-          ];
+  const bottomLinks = [
+    { href: withLocaleHref(locale, "/kontakti"), label: t(locale, "home.bottomLinks.freeConsultation") },
+    { href: withLocaleHref(locale, "/kontakti#salons"), label: t(locale, "home.bottomLinks.visitShowroom") },
+    { href: withLocaleHref(locale, "/#kategorijas"), label: t(locale, "home.bottomLinks.fullAssortment") },
+  ];
 
   return (
     <main className="overflow-hidden">
@@ -301,44 +269,34 @@ export default async function Home({ params }) {
             slides={[
               {
                 image: "https://images.unsplash.com/photo-1613544723301-176686aa9f09?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=2400",
-                kicker: locale === "lv" ? "IEEJAS DURVIS" : locale === "en" ? "ENTRANCE DOORS" : "ĮĖJIMO DURYS",
-                title: locale === "lv" ? "Cilvēcīgi silts, vizuāli kluss ieejas risinājums" : locale === "en" ? "A quietly dramatic entrance statement" : "Tyliai dramatiškas įėjimo sprendimas",
-                subtitle: locale === "lv" ? "Premium durvis reālā vidē, kur forma, drošība un komforts jūtami no pirmā skatiena." : locale === "en" ? "Premium doors in a real setting where form, security and comfort are felt at first glance." : "Aukščiausios klasės durys tikroje aplinkoje, kur forma, saugumas ir komfortas jaučiami iš pirmo žvilgsnio.",
+                kicker: t(locale, "home.hero.slide1.kicker"),
+                title: t(locale, "home.hero.slide1.title"),
+                subtitle: t(locale, "home.hero.slide1.subtitle"),
                 cta: [
-                  { label: locale === "lv" ? "Skatīt kolekciju" : locale === "en" ? "View collection" : "Peržiūrėti kolekciją", href: withLocaleHref(locale, "/kategorija/ardurvis-privatmajai") },
-                  { label: locale === "lv" ? "Pieprasīt piedāvājumu" : locale === "en" ? "Request a quote" : "Prašyti pasiūlymo", href: withLocaleHref(locale, "/kontakti") },
+                  { label: t(locale, "home.hero.slide1.ctaCollection"), href: withLocaleHref(locale, "/kategorija/ardurvis-privatmajai") },
+                  { label: t(locale, "home.hero.slide1.ctaOffer"), href: withLocaleHref(locale, "/kontakti") },
                 ],
               },
               {
                 image: "https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=2400",
-                alt:
-                  locale === "lv"
-                    ? "Ārdurvis elegantā fasādē ar izteiktu, drošu raksturu"
-                    : locale === "en"
-                      ? "Exterior doors on an elegant facade with a strong, secure character"
-                      : "Lauko durys elegantiškame fasade su ryškiu, saugiu charakteriu",
-                kicker: locale === "lv" ? "ĀRDURVIS" : locale === "en" ? "EXTERIOR DOORS" : "LAUKO DURYS",
-                title: locale === "lv" ? "Stiprs pirmais iespaids ārpusē" : locale === "en" ? "A strong first impression outside" : "Stiprus pirmasis įspūdis išorėje",
-                subtitle: locale === "lv" ? "Aizsardzība, energoefektivitāte un mierīgs dizains vienā kadrā." : locale === "en" ? "Protection, energy efficiency and calm design in one frame." : "Apsauga, energinis efektyvumas ir ramus dizainas viename kadre.",
+                alt: t(locale, "home.hero.slide2.alt"),
+                kicker: t(locale, "home.hero.slide2.kicker"),
+                title: t(locale, "home.hero.slide2.title"),
+                subtitle: t(locale, "home.hero.slide2.subtitle"),
                 cta: [
-                  { label: locale === "lv" ? "Skatīt kolekciju" : locale === "en" ? "View collection" : "Peržiūrėti kolekciją", href: withLocaleHref(locale, "/kategorija/ardurvis-privatmajai") },
-                  { label: locale === "lv" ? "Pieprasīt piedāvājumu" : locale === "en" ? "Request a quote" : "Prašyti pasiūlymo", href: withLocaleHref(locale, "/kontakti") },
+                  { label: t(locale, "home.hero.slide2.ctaCollection"), href: withLocaleHref(locale, "/kategorija/ardurvis-privatmajai") },
+                  { label: t(locale, "home.hero.slide2.ctaOffer"), href: withLocaleHref(locale, "/kontakti") },
                 ],
               },
               {
                 image: "https://images.unsplash.com/photo-1552819401-700b5e342b9d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=2400",
-                alt:
-                  locale === "lv"
-                    ? "Gaišas iekšdurvis klusā, minimālistiskā interjerā"
-                    : locale === "en"
-                      ? "Light interior doors in a quiet, minimalist interior"
-                      : "Šviesios vidaus durys tyliame, minimalistiniame interjere",
-                kicker: locale === "lv" ? "IEKŠDURVIS" : locale === "en" ? "INTERIOR DOORS" : "VIDAUS DURYS",
-                title: locale === "lv" ? "Tīrs interjers ar klusu raksturu" : locale === "en" ? "A clean interior with quiet character" : "Švarus interjeras su ramiu charakteriu",
-                subtitle: locale === "lv" ? "Mierīgs, gaismā tīrs kadrējums ikdienas telpām, kur svarīga ir detaļa." : locale === "en" ? "A calm, light-filled frame for everyday spaces where detail matters." : "Ramus, šviesos pripildytas kadras kasdienėms erdvėms, kur svarbi detalė.",
+                alt: t(locale, "home.hero.slide3.alt"),
+                kicker: t(locale, "home.hero.slide3.kicker"),
+                title: t(locale, "home.hero.slide3.title"),
+                subtitle: t(locale, "home.hero.slide3.subtitle"),
                 cta: [
-                  { label: locale === "lv" ? "Skatīt kolekciju" : locale === "en" ? "View collection" : "Peržiūrėti kolekciją", href: withLocaleHref(locale, "/kategorija/ieksdurvis") },
-                  { label: locale === "lv" ? "Pieprasīt piedāvājumu" : locale === "en" ? "Request a quote" : "Prašyti pasiūlymo", href: withLocaleHref(locale, "/kontakti") },
+                  { label: t(locale, "home.hero.slide3.ctaCollection"), href: withLocaleHref(locale, "/kategorija/ieksdurvis") },
+                  { label: t(locale, "home.hero.slide3.ctaOffer"), href: withLocaleHref(locale, "/kontakti") },
                 ],
               },
             ]}

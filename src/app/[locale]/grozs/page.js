@@ -123,10 +123,10 @@ export default function GrozsPage() {
                         max={99}
                         value={it.qty}
                         onChange={(e) => setQty(index, e.target.value)}
-                        className="w-16 rounded-sm border border-line bg-white px-2 py-1 text-[14px] text-ink"
+                        className="h-11 w-16 rounded-sm border border-line bg-white px-2 py-1 text-[14px] text-ink"
                         aria-label={t(locale, "rfq.quantity") || "Daudzums"}
                       />
-                      <button type="button" onClick={() => remove(index)} className="rounded-sm border border-line px-2 py-1.5 text-[13px] hover:border-[--color-muted]">
+                      <button type="button" onClick={() => remove(index)} className="inline-flex h-11 min-w-11 items-center justify-center rounded-sm border border-line px-3 text-[13px] hover:border-[--color-muted]">
                         {t(locale, "rfq.remove") || "Noņemt"}
                       </button>
                     </div>
@@ -169,9 +169,9 @@ export default function GrozsPage() {
                     className="rounded-sm border border-line bg-white px-3 py-2 text-[15px] text-ink"
                   />
                 </div>
-                <div className="md:col-span-2 flex items-center justify-between">
-                  <button type="button" onClick={clear} className="rounded-sm border border-line px-4 py-2 text-[14px] hover:border-[--color-muted]">{t(locale, "rfq.clearAll") || "Notīrīt sarakstu"}</button>
-                  <button type="submit" disabled={isSubmitting} className="rounded-sm bg-[var(--color-accent)] hover:bg-[var(--color-accent-dark)] text-white px-5 py-2.5 text-[14px] shadow-premium disabled:cursor-not-allowed disabled:opacity-70">{isSubmitting ? (t(locale, "rfq.sending") || "Nosūta...") : (t(locale, "rfq.send") || "Nosūtīt pieprasījumu")}</button>
+                <div className="md:col-span-2 flex items-center justify-between gap-3">
+                  <button type="button" onClick={clear} className="inline-flex h-11 min-w-11 items-center justify-center rounded-sm border border-line px-4 text-[14px] hover:border-[--color-muted]">{t(locale, "rfq.clearAll") || "Notīrīt sarakstu"}</button>
+                  <button type="submit" disabled={isSubmitting} className="inline-flex h-11 min-w-11 items-center justify-center rounded-sm bg-[var(--color-accent)] px-5 text-[14px] text-white shadow-premium hover:bg-[var(--color-accent-dark)] disabled:cursor-not-allowed disabled:opacity-70">{isSubmitting ? (t(locale, "rfq.sending") || "Nosūta...") : (t(locale, "rfq.send") || "Nosūtīt pieprasījumu")}</button>
                 </div>
                 {submitError ? <div className="md:col-span-2 text-[13px] text-destructive" role="alert">{submitError}</div> : null}
               </form>

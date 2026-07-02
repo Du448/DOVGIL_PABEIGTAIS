@@ -11,7 +11,12 @@ export async function generateMetadata({ params }) {
 
   const product = getProductById(id);
   if (!product) return { title: t(locale, "product.notFound") };
-  const title = `${product.name} — ${product.collection} | DOVGIL`;
+  const title =
+    locale === "en"
+      ? `${product.name} — ${product.collection} doors | DOVGIL`
+      : locale === "lv"
+        ? `${product.name} — ${product.collection} | DOVGIL`
+        : `${product.name} — ${product.collection} durys | DOVGIL`;
 
   const description =
     locale === "en"

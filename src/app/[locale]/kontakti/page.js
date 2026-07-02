@@ -9,6 +9,7 @@ export async function generateMetadata({ params }) {
   const description = t(locale, "contacts.contactUs");
 
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://dovgil.lv";
+  const pathLt = `/lt/kontakti`;
   const pathLv = `/lv/kontakti`;
   const pathEn = `/en/kontakti`;
 
@@ -23,8 +24,8 @@ export async function generateMetadata({ params }) {
       type: "website",
     },
     alternates: {
-      canonical: `${base}${locale === "en" ? pathEn : pathLv}`,
-      languages: { lv: `${base}${pathLv}`, en: `${base}${pathEn}` },
+      canonical: `${base}${locale === "lt" ? pathLt : locale === "en" ? pathEn : pathLv}`,
+      languages: { lt: `${base}${pathLt}`, lv: `${base}${pathLv}`, en: `${base}${pathEn}` },
     },
   };
 }

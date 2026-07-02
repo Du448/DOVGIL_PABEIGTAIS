@@ -113,7 +113,7 @@ function ReviewCard({ review }) {
         </div>
 
         <p className="mb-6 text-[15px] italic leading-7 text-muted">
-          "{getReviewText(review)}"
+          &ldquo;{getReviewText(review)}&rdquo;
         </p>
       </div>
 

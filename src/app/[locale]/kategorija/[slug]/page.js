@@ -11,6 +11,14 @@ const LT_CATEGORY_NAMES = {
   "sleptas-durvis": "Paslėptos durys",
 };
 
+const CATEGORY_TITLE_KEYS = {
+  "ardurvis-dzivoklim": "categories.ardurvis-dzivoklim",
+  "ardurvis-privatmajai": "categories.ardurvis-privatmajai",
+  ieksdurvis: "categories.ieksdurvis",
+  "bidamas-durvis": "categories.bidamas-durvis",
+  "sleptas-durvis": "categories.sleptas-durvis",
+};
+
 export function generateStaticParams() {
   return categories.map((category) => ({ slug: category.slug }));
 }
@@ -19,13 +27,8 @@ export async function generateMetadata({ params }) {
   const { slug, locale } = await params;
 
   const category = getCategoryBySlug(slug);
-  const nameLt = LT_CATEGORY_NAMES[slug] || category?.name || "Kategorija";
-  const name =
-    locale === "en"
-      ? category?.name || nameLt
-      : locale === "lv"
-        ? category?.name || nameLt
-        : nameLt;
+  const nameLt = LT_CATEGORY_NAMES[slug] || t("lt", CATEGORY_TITLE_KEYS[slug] || "") || category?.name || "Kategorija";
+  const name = t(locale, CATEGORY_TITLE_KEYS[slug] || "") || nameLt;
 
   const title = `${name} | DOVGIL`;
   const description =

@@ -26,10 +26,10 @@ export default function Footer() {
           <div>
             <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-muted">{t(locale, "footer.services")}</h3>
             <ul className="space-y-2.5 text-[15px] leading-7 text-ink">
-              <li><Link className="transition-colors hover:text-[var(--color-accent-dark)]" href={withLocaleHref(locale, "/pakalpojumi/uzmerisana")}>{t(locale, "footer.measurement")}</Link></li>
-              <li><Link className="transition-colors hover:text-[var(--color-accent-dark)]" href={withLocaleHref(locale, "/pakalpojumi/montaza")}>{t(locale, "footer.installation")}</Link></li>
-              <li><Link className="transition-colors hover:text-[var(--color-accent-dark)]" href={withLocaleHref(locale, "/pakalpojumi/garantija")}>{t(locale, "footer.warranty")}</Link></li>
-              <li><Link className="transition-colors hover:text-[var(--color-accent-dark)]" href={withLocaleHref(locale, "/pakalpojumi/piegade")}>{t(locale, "footer.delivery")}</Link></li>
+              <li><Link className="transition-colors hover:text-[var(--color-accent-dark)]" href={withLocaleHref(locale, "/pakalpojumi")}>{t(locale, "footer.measurement")}</Link></li>
+              <li><Link className="transition-colors hover:text-[var(--color-accent-dark)]" href={withLocaleHref(locale, "/pakalpojumi")}>{t(locale, "footer.installation")}</Link></li>
+              <li><Link className="transition-colors hover:text-[var(--color-accent-dark)]" href={withLocaleHref(locale, "/pakalpojumi")}>{t(locale, "footer.warranty")}</Link></li>
+              <li><Link className="transition-colors hover:text-[var(--color-accent-dark)]" href={withLocaleHref(locale, "/pakalpojumi")}>{t(locale, "footer.delivery")}</Link></li>
             </ul>
           </div>
 

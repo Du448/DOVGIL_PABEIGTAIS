@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Heart } from "lucide-react";
 import { isWishlisted, toggleWishlistId } from "@/lib/wishlist";
 import { useCompare } from "@/lib/compare";
@@ -36,13 +36,13 @@ export default function CompareClient({ locale }) {
   }, []);
 
   // Locale-aware fallback for labels when i18n key is missing
-  const tr = (key, lv, lt, en) => {
+  const tr = useCallback((key, lv, lt, en) => {
     const v = t(locale, key);
     if (v === key) {
       return locale === "lv" ? lv : locale === "lt" ? lt : en;
     }
     return v;
-  };
+  }, [locale]);
 
   const rows = useMemo(() => {
     const norm = (v) => (v == null ? "" : String(v).trim());
@@ -96,7 +96,7 @@ export default function CompareClient({ locale }) {
       return { key: k, label: byKey[k].label, values, distinct };
     });
     return data;
-  }, [prods, locale]);
+  }, [prods, tr, locale]);
 
   // View mode: all specs vs only differences
   const [onlyDiff, setOnlyDiff] = useState(false);

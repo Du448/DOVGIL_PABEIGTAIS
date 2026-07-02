@@ -17,13 +17,13 @@ export default function CompareBar() {
   const removeLabel = locale === "lv" ? "Noņemt no salīdzināšanas" : locale === "lt" ? "Pašalinti iš palyginimo" : "Remove from compare";
 
   // Collapsible state persisted in localStorage
-  const [collapsed, setCollapsed] = useState(false);
-  useEffect(() => {
+  const [collapsed, setCollapsed] = useState(() => {
     try {
-      const raw = localStorage.getItem("compareBar:collapsed");
-      setCollapsed(raw === "1");
-    } catch {}
-  }, []);
+      return localStorage.getItem("compareBar:collapsed") === "1";
+    } catch {
+      return false;
+    }
+  });
   useEffect(() => {
     try {
       localStorage.setItem("compareBar:collapsed", collapsed ? "1" : "0");
