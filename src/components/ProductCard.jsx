@@ -6,6 +6,7 @@ import { Heart, ArrowRight, Eye, Layers } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { getLocaleFromPathname, withLocaleHref, t } from "@/lib/i18n";
+import { ikSrc } from "@/lib/imagekit";
 import { isWishlisted, toggleWishlistId } from "@/lib/wishlist";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -68,7 +69,7 @@ export default function ProductCard({ product, variant = "default" }) {
         {product.images && product.images.length > 0 ? (
           <div className={`relative bg-white ${isCatalogVariant ? "aspect-[4/5]" : "aspect-[4/3]"}`}>
             <Image
-              src={product.images[activeIdx]}
+              src={ikSrc(product.images[activeIdx], { w: 600 })}
               alt={product.name}
               fill
               sizes={isCatalogVariant ? "(max-width: 768px) 100vw, (max-width: 1280px) 33vw, 25vw" : "(max-width: 768px) 100vw, 25vw"}

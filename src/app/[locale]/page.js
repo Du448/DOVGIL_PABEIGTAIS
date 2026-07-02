@@ -12,6 +12,7 @@ import HomeSpotlightCarousel from "@/components/HomeSpotlightCarousel";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ArrowRight, ChevronRight, Phone } from "lucide-react";
 import { withLocaleHref, t } from "@/lib/i18n";
+import { ikSrc } from "@/lib/imagekit";
 
 export async function generateMetadata({ params }) {
   const { locale } = await params;
@@ -370,7 +371,7 @@ export default async function Home({ params }) {
                           {categoryImage.images.map((src, index) => (
                             <div key={`${c.slug}-${index}`} className="relative overflow-hidden">
                               <Image
-                                src={src}
+                                src={ikSrc(src, { w: 800 })}
                                 alt={categoryImage.alt[locale] || categoryName}
                                 fill
                                 sizes="(max-width: 768px) 100vw, (max-width: 1279px) 50vw, 33vw"
@@ -381,7 +382,7 @@ export default async function Home({ params }) {
                         </div>
                       ) : (
                         <Image
-                          src={categoryImage.src}
+                          src={ikSrc(categoryImage.src, { w: 800 })}
                           alt={categoryImage.alt[locale] || categoryName}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1279px) 50vw, 33vw"

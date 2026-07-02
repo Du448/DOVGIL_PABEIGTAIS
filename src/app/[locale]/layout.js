@@ -68,6 +68,10 @@ export default async function RootLayout({ children, params }) {
 
   return (
     <html lang={locale}>
+      <head>
+        <link rel="preconnect" href="https://ik.imagekit.io" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="//ik.imagekit.io" />
+      </head>
       <body className={`${inter.className} antialiased`}>
         <TooltipProvider>
           <CompareProvider>

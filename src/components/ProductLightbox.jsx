@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { t } from "@/lib/i18n";
 import { useCallback, useEffect, useRef } from "react";
+import { ikSrc } from "@/lib/imagekit";
 
 export default function ProductLightbox({ images = [], index = 0, setIndex, onClose, locale, productName }) {
   const hasImages = Array.isArray(images) && images.length > 0;
@@ -121,7 +122,7 @@ export default function ProductLightbox({ images = [], index = 0, setIndex, onCl
             {images.map((src, idx) => (
               <div key={`lightbox-${idx}`} className="relative h-full w-full shrink-0 grow-0 basis-full">
                 <Image
-                  src={src}
+                  src={ikSrc(src, { w: 1920 })}
                   alt={`${productName} – palielināts attēls ${idx + 1}`}
                   fill
                   referrerPolicy="no-referrer"

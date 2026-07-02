@@ -6,10 +6,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Heart, ShoppingCart, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { gsap } from "gsap";
 import { getLocaleFromPathname, withLocaleHref, locales, t } from "@/lib/i18n";
 import { readWishlistIds } from "@/lib/wishlist";
 import { products, categories } from "@/data/products";
+
+const HeaderMobileDrawer = dynamic(() => import("./HeaderMobileDrawer"), { ssr: false, loading: () => null });
+const HeaderSearchOverlay = dynamic(() => import("./HeaderSearchOverlay"), { ssr: false, loading: () => null });
 
 function NavLink({ href, children, highlight, overlay = false }) {
   return (
@@ -547,136 +551,23 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile search overlay */}
       {showSearch && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 md:hidden"
-          onClick={() => setShowSearch(false)}
-        >
-          <div
-            className="absolute inset-x-0 top-0 bg-bg border-b border-line p-3"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <form
-              className="relative"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const q = query.trim();
-                if (q.length) {
-                  router.push(withLocaleHref(locale, `/meklet?q=${encodeURIComponent(q)}`));
-                  setShowSearch(false);
-                }
-              }}
-            >
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">
-                <Search size={18} />
-              </span>
-              <input
-                autoFocus
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={t(locale, "nav.searchPlaceholder")}
-                className="w-full rounded-sm border border-line bg-white pl-9 pr-10 py-2 text-[15px] placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-[--color-accent]"
-                aria-label={t(locale, "a11y.search")}
-                onBlur={() => {
-                  window.setTimeout(() => setOpenSuggest(false), 120);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Escape") closeMobileSearch();
-                  onKeyDown(e);
-                }}
-              />
-              <button
-                type="button"
-                aria-label={t(locale, "a11y.close")}
-                onClick={closeMobileSearch}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted px-2"
-              >
-                ✕
-              </button>
-              {/* Overlay suggestions (mobile full-screen overlay) */}
-              {openSuggest && (
-                <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-40 rounded-lg border border-line bg-bg/95 shadow-[0_20px_40px_-28px_rgba(0,0,0,0.35)] backdrop-blur">
-                  {combined.length > 0 ? (
-                    <ul className="max-h-[65vh] overflow-auto py-2">
-                      {combined.map((item, idx) => {
-                        if (item.type === "section") {
-                          return (
-                            <li key={`os-${item.id}`} className="px-3 pt-3 pb-1 text-[12px] font-semibold tracking-wide text-muted uppercase">
-                              {item.label}
-                            </li>
-                          );
-                        }
-                        if (item.type === "product") {
-                          const p = item.data;
-                          const active = idx === activeIndex;
-                          return (
-                            <li key={`op-${p.id}`}>
-                              <button
-                                type="button"
-                                onMouseEnter={() => setActiveIndex(idx)}
-                                onClick={() => selectItem(item)}
-                                className={`flex w-full items-center gap-3 px-3 py-2 text-left ${active ? "bg-soft" : "hover:bg-soft/70"}`}
-                              >
-                                <img src={p.images?.[0]} alt="" className="h-9 w-9 rounded-sm object-cover border border-line" />
-                                <div className="min-w-0 flex-1">
-                                  <div className="truncate text-[14px] text-ink">{p.name}</div>
-                                  <div className="truncate text-[12px] text-muted">{p.collection} • €{p.price}</div>
-                                </div>
-                              </button>
-                            </li>
-                          );
-                        }
-                        if (item.type === "category") {
-                          const c = item.data;
-                          const active = idx === activeIndex;
-                          return (
-                            <li key={`oc-${c.slug}`}>
-                              <button
-                                type="button"
-                                onMouseEnter={() => setActiveIndex(idx)}
-                                onClick={() => selectItem(item)}
-                                className={`flex w-full items-center gap-3 px-3 py-2 text-left ${active ? "bg-soft" : "hover:bg-soft/70"}`}
-                              >
-                                <span className="inline-flex h-9 w-9 items-center justify-center rounded-sm border border-line bg-soft text-[12px] font-semibold text-ink">
-                                  #{c.group?.[0] || c.name?.[0]}
-                                </span>
-                                <div className="min-w-0 flex-1">
-                                  <div className="truncate text-[14px] text-ink">{c.name}</div>
-                                  <div className="truncate text-[12px] text-muted">/{c.slug}</div>
-                                </div>
-                              </button>
-                            </li>
-                          );
-                        }
-                        return null;
-                      })}
-                    </ul>
-                  ) : (
-                    <div className="p-4">
-                      <div className="text-[14px] text-ink font-medium mb-1">{t(locale, "search.noResults") || "Nav rezultātu"}</div>
-                      <div className="text-[13px] text-muted mb-3">{t(locale, "search.tryPopular") || "Apskati populārākās kategorijas"}</div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {popularCategories.map((c) => (
-                          <button
-                            key={c.slug}
-                            type="button"
-                            onClick={() => selectItem({ type: "category", data: c })}
-                            className="rounded-md border border-line bg-white px-3 py-2 text-left hover:bg-soft"
-                          >
-                            <div className="text-[13px] text-ink">{c.name}</div>
-                            <div className="text-[12px] text-muted">{c.count} {t(locale, "search.items") || "preces"}</div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </form>
-          </div>
-        </div>
+        <HeaderSearchOverlay
+          activeIndex={activeIndex}
+          combined={combined}
+          locale={locale}
+          openSuggest={openSuggest}
+          popularCategories={popularCategories}
+          query={query}
+          router={router}
+          onClose={closeMobileSearch}
+          selectItem={selectItem}
+          setActiveIndex={setActiveIndex}
+          setOpenSuggest={setOpenSuggest}
+          setQuery={setQuery}
+          t={t}
+          withLocaleHref={withLocaleHref}
+        />
       )}
 
       {/* Categories bar */}
@@ -717,58 +608,16 @@ export default function Header() {
             </div>
           )}
 
-          {/* Mobile nav */}
           {open && (
-            <div
-              className="fixed inset-0 z-50 md:hidden"
-              onClick={() => setOpen(false)}
-            >
-              <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-              <div
-                className="absolute inset-x-0 top-0 max-h-[85vh] overflow-auto border-b border-line bg-bg shadow-lg"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex items-center justify-between px-3 py-3 border-b border-line">
-                  <div className="text-sm font-semibold tracking-wide text-ink">{t(locale, "category.filters")}</div>
-                  <button
-                    type="button"
-                    aria-label={t(locale, "a11y.close")}
-                    className="rounded-sm border border-line px-3 py-1.5 text-sm text-ink"
-                    onClick={() => setOpen(false)}
-                  >
-                    {t(locale, "a11y.close")}
-                  </button>
-                </div>
-
-                <div className="flex flex-col py-2">
-                  <div className="flex items-center gap-2 px-3 pt-2 pb-3">
-                    {locales.map((l) => (
-                      <Link
-                        key={l}
-                        href={buildLangHref(l)}
-                        onClick={() => {
-                          if (l !== locale) router.refresh();
-                          setOpen(false);
-                        }}
-                        className={`rounded-sm border border-line px-2 py-1 text-xs font-semibold tracking-wide ${l === locale ? "text-accent" : "text-ink"}`}
-                      >
-                        {l.toUpperCase()}
-                      </Link>
-                    ))}
-                  </div>
-
-                  <Link href={withLocaleHref(locale, "/jaunumi")} onClick={() => setOpen(false)} className="px-3 py-2 text-ink">{t(locale, "nav.news")}</Link>
-                  <Link href={withLocaleHref(locale, "/kategorija/ardurvis-dzivoklim")} onClick={() => setOpen(false)} className="px-3 py-2 text-ink">{t(locale, "nav.exteriorApartment")}</Link>
-                  <Link href={withLocaleHref(locale, "/kategorija/ardurvis-privatmajai")} onClick={() => setOpen(false)} className="px-3 py-2 text-ink">{t(locale, "nav.exteriorHouse")}</Link>
-                  <Link href={withLocaleHref(locale, "/kategorija/ieksdurvis")} onClick={() => setOpen(false)} className="px-3 py-2 text-ink">{t(locale, "nav.interior")}</Link>
-                  <Link href={withLocaleHref(locale, "/kategorija/bidamas-durvis")} onClick={() => setOpen(false)} className="px-3 py-2 text-ink">{t(locale, "nav.sliding")}</Link>
-                  <Link href={withLocaleHref(locale, "/kategorija/sleptas-durvis")} onClick={() => setOpen(false)} className="px-3 py-2 text-ink">{t(locale, "nav.hidden")}</Link>
-                  <Link href={withLocaleHref(locale, "/akcijas")} onClick={() => setOpen(false)} className="px-3 py-2 text-accent">{t(locale, "nav.deals")}</Link>
-                  <Link href={withLocaleHref(locale, "/par-mums")} onClick={() => setOpen(false)} className="px-3 py-2 text-ink">{t(locale, "nav.about")}</Link>
-                  <Link href={withLocaleHref(locale, "/kontakti")} onClick={() => setOpen(false)} className="px-3 py-2 text-ink">{t(locale, "nav.contacts")}</Link>
-                </div>
-              </div>
-            </div>
+            <HeaderMobileDrawer
+              buildLangHref={buildLangHref}
+              locale={locale}
+              locales={locales}
+              router={router}
+              setOpen={setOpen}
+              t={t}
+              withLocaleHref={withLocaleHref}
+            />
           )}
         </div>
       </div>

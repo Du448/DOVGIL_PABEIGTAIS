@@ -2,25 +2,51 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Heart, Shield, ChevronUp, ChevronDown, Truck, Ruler, Wrench, ShieldCheck, ChevronLeft, ChevronRight, Layers } from "lucide-react";
-import ProductCard from "@/components/ProductCard";
+import { Heart, Shield, ChevronUp, ChevronDown, Truck, Ruler, Wrench, ShieldCheck, ChevronRight, Layers } from "lucide-react";
 import AccordionItem from "@/components/anim/AccordionItem";
 import MagneticButton from "@/components/anim/MagneticButton";
 import MotionReveal from "@/components/motion/MotionReveal";
 import MotionCountUp from "@/components/motion/MotionCountUp";
-import InbankCalculator from "@/components/InbankCalculator";
 import { getProductById, getProductsByCategory } from "@/data/products";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { getLocaleFromPathname, translateColorLabel, withLocaleHref, t } from "@/lib/i18n";
+import { ikSrc } from "@/lib/imagekit";
 import { cn } from "@/lib/utils";
 import { isWishlisted, toggleWishlistId } from "@/lib/wishlist";
 import { useCompare } from "@/lib/compare";
 import { useRfq } from "@/lib/rfq";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const Lightbox = dynamic(() => import("./ProductLightbox"), { ssr: false });
+const Lightbox = dynamic(() => import("./ProductLightbox"), { ssr: false, loading: () => null });
+const ProductClientInbankBlock = dynamic(() => import("./ProductClientInbankBlock"), {
+  ssr: false,
+  loading: () => <Skeleton className="mt-4 h-36 w-full max-w-2xl rounded-2xl" />,
+});
+const ProductClientSimilarProducts = dynamic(() => import("./ProductClientSimilarProducts"), {
+  ssr: false,
+  loading: () => (
+    <section>
+      <div className="container">
+        <div className="mb-3 flex items-center justify-between">
+          <Skeleton className="h-8 w-40 rounded-md" />
+          <div className="hidden md:flex items-center gap-2">
+            <Skeleton className="h-10 w-10 rounded-sm" />
+            <Skeleton className="h-10 w-10 rounded-sm" />
+          </div>
+        </div>
+        <div className="flex gap-4 overflow-hidden pb-2">
+          <Skeleton className="h-[320px] w-[260px] shrink-0 rounded-2xl" />
+          <Skeleton className="h-[320px] w-[260px] shrink-0 rounded-2xl" />
+          <Skeleton className="h-[320px] w-[260px] shrink-0 rounded-2xl" />
+          <Skeleton className="h-[320px] w-[260px] shrink-0 rounded-2xl" />
+        </div>
+      </div>
+    </section>
+  ),
+});
 
 const measurementCityOptions = [
   { id: "riga", label: "Rīga", price: 20, distance: null },
@@ -757,7 +783,7 @@ export default function ProductClient({ id }) {
                     aria-label={`${t(locale, "product.openImage")} — ${product.name}`}
                   >
                     <Image
-                      src={images[activeIdx]}
+                      src={ikSrc(images[activeIdx], { w: 1200 })}
                       alt={
                         activeIdx === 0
                           ? `${product.name} — galvenais produkta attēls`
@@ -920,9 +946,7 @@ export default function ProductClient({ id }) {
                 ))}
               </div>
 
-              <div className="mt-4">
-                <InbankCalculator price={product.price} locale={locale} />
-              </div>
+              <ProductClientInbankBlock price={product.price} locale={locale} />
 
               {serviceOptions.length ? (
                 <TooltipProvider delayDuration={150}>
@@ -1192,31 +1216,7 @@ export default function ProductClient({ id }) {
         </MotionReveal>
       </section>
 
-      {/* Similar products: horizontal carousel */}
-      <section>
-        <div className="container">
-          <MotionReveal className="mb-3 flex items-center justify-between" index={0} y={12}>
-            <h2 className="text-2xl font-semibold">{t(locale, "product.similar")}</h2>
-            <div className="hidden md:flex items-center gap-2">
-              <button type="button" className="rounded-sm border border-line p-2 text-ink hover:border-[--color-muted]" onClick={() => {
-                const scroller = document.getElementById("similar-scroll");
-                if (scroller) scroller.scrollBy({ left: -320, behavior: "smooth" });
-              }}><ChevronLeft size={18} /></button>
-              <button type="button" className="rounded-sm border border-line p-2 text-ink hover:border-[--color-muted]" onClick={() => {
-                const scroller = document.getElementById("similar-scroll");
-                if (scroller) scroller.scrollBy({ left: 320, behavior: "smooth" });
-              }}><ChevronRight size={18} /></button>
-            </div>
-          </MotionReveal>
-          <div id="similar-scroll" className="flex gap-4 overflow-x-auto no-scrollbar touch-pan-x snap-x snap-mandatory pb-2">
-            {similar.map((p, index) => (
-              <MotionReveal key={p.id} index={index} className="snap-start shrink-0 w-[260px]" y={14}>
-                <ProductCard product={p} />
-              </MotionReveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ProductClientSimilarProducts locale={locale} similar={similar} />
 
       {lightboxOpen && (
         <Lightbox

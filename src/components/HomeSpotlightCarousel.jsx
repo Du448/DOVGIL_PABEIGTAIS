@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MotionScrollFloat from "@/components/motion/MotionScrollFloat";
 import { t, withLocaleHref } from "@/lib/i18n";
+import { ikSrc } from "@/lib/imagekit";
 
 export default function HomeSpotlightCarousel({ locale, items }) {
   const safeItems = Array.isArray(items) ? items : [];
@@ -110,7 +111,7 @@ export default function HomeSpotlightCarousel({ locale, items }) {
                     <MotionScrollFloat className="relative" range={10}>
                       <div className="relative mx-auto aspect-[4/4.6] w-full max-w-[620px] overflow-hidden">
                         <Image
-                          src={item.image || "/next.svg"}
+                          src={ikSrc(item.image || "/next.svg", { w: 800 })}
                           alt={item.alt || item.name}
                           fill
                           sizes="(max-width: 1024px) 100vw, 46vw"

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { getLocaleFromPathname, t } from "@/lib/i18n";
+import { ikSrc } from "@/lib/imagekit";
 
 const prefersReduced = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -214,10 +215,11 @@ export default function HeroSlider({ slides }) {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div data-hero-img className="relative h-full w-full max-w-none will-change-transform">
                   <Image
-                    src={slide.image}
+                    src={ikSrc(slide.image, { w: 1920 })}
                     alt={slide.alt || slide.title || t(locale, "hero.imageAlt")}
                     fill
                     priority={i === 0}
+                    fetchPriority={i === 0 ? "high" : undefined}
                     sizes="100vw"
                     className="object-cover"
                   />
