@@ -85,6 +85,24 @@ function loadCalculatorWidget() {
   return calculatorWidgetPromise;
 }
 
+function describeCalculatorWidget(CalculatorWidget) {
+  const keys = Object.keys(CalculatorWidget || {});
+  const variantKeys = ["variants", "supportedVariants", "supported_variants", "availableVariants", "available_variants"].filter(
+    (key) => key in (CalculatorWidget || {}),
+  );
+
+  console.debug("[InbankCalculator] CalculatorWidget available", {
+    keys,
+    variantKeys,
+    hasInit: typeof CalculatorWidget?.init === "function",
+    initArity: typeof CalculatorWidget?.init === "function" ? CalculatorWidget.init.length : null,
+  });
+
+  for (const key of variantKeys) {
+    console.debug(`[InbankCalculator] CalculatorWidget.${key}`, CalculatorWidget[key]);
+  }
+}
+
 export default function InbankCalculator({ price, locale }) {
   const shopUuid = process.env.NEXT_PUBLIC_INBANK_SHOP_UUID;
   const productCode = process.env.NEXT_PUBLIC_INBANK_PRODUCT_CODE;
@@ -114,17 +132,29 @@ export default function InbankCalculator({ price, locale }) {
 
     const renderWidget = async () => {
       setIsLoading(true);
-      container.innerHTML = "";
+      console.debug("[InbankCalculator] awaiting CalculatorWidget", {
+        containerId,
+        amount: normalizedPrice,
+        lang: mapLocale(locale),
+        region: process.env.NEXT_PUBLIC_INBANK_REGION || "lv",
+      });
 
       try {
         const CalculatorWidget = await loadCalculatorWidget();
 
         if (cancelled || initTokenRef.current !== initToken || !containerRef.current) {
+          console.debug("[InbankCalculator] init aborted before widget init", {
+            containerId,
+            initToken,
+            currentToken: initTokenRef.current,
+            cancelled,
+          });
           return;
         }
 
+        describeCalculatorWidget(CalculatorWidget);
         container.innerHTML = "";
-        CalculatorWidget.init(containerId, {
+        const initConfig = {
           layout: "default",
           variant: "calculator-indivy-plan",
           shop_uuid: shopUuid,
@@ -134,14 +164,35 @@ export default function InbankCalculator({ price, locale }) {
           mode: "white",
           lang: mapLocale(locale),
           region: process.env.NEXT_PUBLIC_INBANK_REGION || "lv",
+        };
+
+        console.debug("[InbankCalculator] calling CalculatorWidget.init", {
+          containerId,
+          config: initConfig,
         });
 
+        const initResult = CalculatorWidget.init(containerId, initConfig);
+        setIsLoading(false);
+
+        console.debug("[InbankCalculator] CalculatorWidget.init returned", {
+          containerId,
+          resultType: initResult === null ? "null" : typeof initResult,
+          isPromise: !!initResult && typeof initResult.then === "function",
+        });
+
+        if (initResult && typeof initResult.then === "function") {
+          await initResult;
+          console.debug("[InbankCalculator] CalculatorWidget.init promise resolved", {
+            containerId,
+          });
+        }
+
         if (!cancelled && initTokenRef.current === initToken) {
-          setIsLoading(false);
+          // Widget owns the container DOM from this point.
         }
       } catch (error) {
         if (!cancelled) {
-          console.error("Failed to initialize Inbank calculator", error);
+          console.error("[InbankCalculator] Failed to initialize Inbank calculator", error);
           setIsLoading(false);
         }
       }
@@ -151,6 +202,7 @@ export default function InbankCalculator({ price, locale }) {
 
     return () => {
       cancelled = true;
+      initTokenRef.current += 1;
       if (container) {
         container.innerHTML = "";
       }
@@ -162,9 +214,9 @@ export default function InbankCalculator({ price, locale }) {
   }
 
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl border border-[#d7def2] bg-white p-2.5 shadow-[0_12px_30px_rgba(15,23,42,0.06)] sm:p-3">
+    <div className={`relative w-full rounded-2xl border border-[#d7def2] bg-white p-2.5 shadow-[0_12px_30px_rgba(15,23,42,0.06)] sm:p-3 ${isLoading ? "min-h-[120px]" : ""}`}>
       {isLoading ? <Skeleton className="h-[120px] w-full rounded-xl" /> : null}
-      <div ref={containerRef} id={containerId} className="min-h-[120px] w-full" />
+      <div ref={containerRef} id={containerId} className="w-full" />
     </div>
   );
 }
