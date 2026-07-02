@@ -12,6 +12,7 @@ const nextConfig = {
       {
         source: "/:path*",
         headers: [
+          // Kept for Inbank compatibility; harmless for other routes.
           {
             key: "Referrer-Policy",
             value: "origin",
