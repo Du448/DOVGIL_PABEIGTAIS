@@ -84,7 +84,7 @@ export default function ContactsClient() {
     <main>
       <section className="border-b border-line">
         <div className="container py-6">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-wide text-ink">{t(locale, "contacts.title")}</h1>
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-wide text-ink">{t(locale, "contacts.title")}</h2>
           {product && (
             <div className="mt-2 text-sm text-muted">
               {t(locale, "contacts.relatedToProduct")} <Link className="text-ink underline" href={withLocaleHref(locale, `/produkts/${product.id}`)}>{product.name}</Link>

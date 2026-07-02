@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 const locales = ["lt", "lv", "en"];
 const defaultLocale = "lv";
 
+function isLocaleLike(segment) {
+  return /^[a-z]{2}$/i.test(segment || "");
+}
+
 function isPublicFile(pathname) {
   return pathname.includes(".");
 }
@@ -26,25 +30,17 @@ export function proxy(request) {
   const hasLocale = locales.includes(first);
 
   if (!hasLocale) {
+    if (isLocaleLike(first)) {
+      return NextResponse.next();
+    }
+
     const url = request.nextUrl.clone();
     url.pathname = `/${defaultLocale}${pathname}`;
     url.search = search;
     return NextResponse.redirect(url);
   }
 
-  const url = request.nextUrl.clone();
-  url.pathname = `/${segments.slice(1).join("/")}`;
-  if (url.pathname === "") url.pathname = "/";
-  url.search = search;
-  url.searchParams.set("__l", first);
-
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-invoke-path", pathname);
-  return NextResponse.rewrite(url, {
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  return NextResponse.next();
 }
 
 export const config = {

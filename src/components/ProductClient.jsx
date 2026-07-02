@@ -423,11 +423,6 @@ export default function ProductClient({ id }) {
     setShowPricesWithoutVat(false);
   }, [product?.id]);
 
-  const shouldShowInbank =
-    process.env.NEXT_PUBLIC_FEATURE_INBANK === "true" &&
-    !!process.env.NEXT_PUBLIC_INBANK_SHOP_UUID &&
-    !!process.env.NEXT_PUBLIC_INBANK_PRODUCT_CODE;
-
   const selectedInstallationCity = deliveryInstallationCityOptions.find((city) => city.id === installationCity) || deliveryInstallationCityOptions[0];
   const selectedMeasurementCity = measurementCityOptions.find((city) => city.id === measurementCity) || measurementCityOptions[0];
   const selectedDeliveryCity = deliveryCityOptions.find((city) => city.id === deliveryCity) || deliveryCityOptions[0];
@@ -778,12 +773,6 @@ export default function ProductClient({ id }) {
                   </button>
                 </div>
               )}
-
-              {shouldShowInbank ? (
-                <div className="mt-2 w-full max-w-none lg:mt-0 lg:max-w-[760px]">
-                  <InbankCalculator price={product.price} locale={locale} />
-                </div>
-              ) : null}
             </MotionReveal>
 
             {/* Right: Info (sticky on desktop) */}
@@ -929,6 +918,10 @@ export default function ProductClient({ id }) {
                     <TooltipContent side="top">{label}</TooltipContent>
                   </Tooltip>
                 ))}
+              </div>
+
+              <div className="mt-4">
+                <InbankCalculator price={product.price} locale={locale} />
               </div>
 
               {serviceOptions.length ? (

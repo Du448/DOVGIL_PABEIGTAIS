@@ -25,7 +25,7 @@ export default function SearchClient() {
     <>
       <section className="border-b border-line">
         <div className="container py-6">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-wide text-ink">{t(locale, "search.title")}</h1>
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-wide text-ink">{t(locale, "search.title")}</h2>
           <p className="mt-2 text-muted">
             {t(locale, "search.results")}: &quot;{q}&quot; ({results.length} {t(locale, "search.found")})
           </p>

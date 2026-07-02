@@ -1,11 +1,12 @@
+"use client";
+
 import Link from "next/link";
-import { headers } from "next/headers";
+import { usePathname } from "next/navigation";
 import { getLocaleFromPathname, t, withLocaleHref } from "@/lib/i18n";
 
-export default async function NotFound() {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export default function NotFound() {
+  const pathname = usePathname();
+  const locale = getLocaleFromPathname(pathname || "/");
 
   return (
     <main>

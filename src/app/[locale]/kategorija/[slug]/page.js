@@ -1,7 +1,6 @@
-import { getCategoryBySlug } from "@/data/products";
+import { categories, getCategoryBySlug } from "@/data/products";
 import CategoryClient from "@/components/CategoryClient";
-import { headers } from "next/headers";
-import { getLocaleFromPathname, t } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 import { Suspense } from "react";
 
 const LT_CATEGORY_NAMES = {
@@ -12,11 +11,12 @@ const LT_CATEGORY_NAMES = {
   "sleptas-durvis": "Paslėptos durys",
 };
 
+export function generateStaticParams() {
+  return categories.map((category) => ({ slug: category.slug }));
+}
+
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+  const { slug, locale } = await params;
 
   const category = getCategoryBySlug(slug);
   const nameLt = LT_CATEGORY_NAMES[slug] || category?.name || "Kategorija";
@@ -63,10 +63,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function CategoryPage({ params }) {
-  const { slug } = await params;
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+  const { slug, locale } = await params;
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://dovgil.lv";
   const category = getCategoryBySlug(slug);
 
@@ -91,6 +88,11 @@ export default async function CategoryPage({ params }) {
 
   return (
     <>
+      <section className="border-b border-line">
+        <div className="container py-6">
+          <h1 className="mt-3" style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)' }}>{category?.name || slug}</h1>
+        </div>
+      </section>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }} />
       <Suspense>
         <CategoryClient slug={slug} />

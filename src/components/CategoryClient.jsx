@@ -526,7 +526,7 @@ export default function CategoryClient({ slug }) {
             <span>/</span>
             <span className="text-[--color-accent]">{categoryName}</span>
           </div>
-          <h1 className="mt-3" style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)' }}>{categoryName}</h1>
+          <h2 className="mt-3" style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)' }}>{categoryName}</h2>
           {resolvedDescription ? (
             <p className="mt-2 max-w-2xl text-sm text-muted leading-relaxed">{resolvedDescription}</p>
           ) : null}

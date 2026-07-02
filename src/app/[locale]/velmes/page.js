@@ -1,11 +1,12 @@
-import { headers } from "next/headers";
-import { getLocaleFromPathname, t } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 import WishlistClient from "@/components/WishlistClient";
 
-export async function generateMetadata() {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://dovgil.lv";
+  const pathLt = "/lt/velmes";
+  const pathLv = "/lv/velmes";
+  const pathEn = "/en/velmes";
 
   const title = `${t(locale, "wishlist.title")} | DOVGIL`;
   const description = t(locale, "wishlist.description");
@@ -20,13 +21,19 @@ export async function generateMetadata() {
       siteName: "DOVGIL",
       type: "website",
     },
+    alternates: {
+      canonical: `${base}${locale === "lv" ? pathLv : locale === "en" ? pathEn : pathLt}`,
+      languages: {
+        lt: `${base}${pathLt}`,
+        lv: `${base}${pathLv}`,
+        en: `${base}${pathEn}`,
+      },
+    },
   };
 }
 
-export default async function VelmesPage() {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export default async function VelmesPage({ params }) {
+  const { locale } = await params;
 
   return (
     <main>

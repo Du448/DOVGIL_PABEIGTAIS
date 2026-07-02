@@ -1,12 +1,9 @@
 import ContactsClient from "@/components/ContactsClient";
 import { Suspense } from "react";
-import { headers } from "next/headers";
-import { getLocaleFromPathname, t } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
-export async function generateMetadata() {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
 
   const title = `${t(locale, "contacts.title")} | DOVGIL`;
   const description = t(locale, "contacts.contactUs");
@@ -32,14 +29,17 @@ export async function generateMetadata() {
   };
 }
 
-export default async function ContactsPage() {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export default async function ContactsPage({ params }) {
+  const { locale } = await params;
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://dovgil.lv";
 
   return (
     <main>
+      <section className="border-b border-line">
+        <div className="container py-6">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-wide text-ink">{t(locale, "contacts.title")}</h1>
+        </div>
+      </section>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

@@ -1,13 +1,13 @@
-import { getProductById } from "@/data/products";
+import { products, getProductById } from "@/data/products";
 import ProductClient from "@/components/ProductClient";
-import { headers } from "next/headers";
-import { getLocaleFromPathname, t } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
+
+export function generateStaticParams() {
+  return products.map((product) => ({ id: product.id }));
+}
 
 export async function generateMetadata({ params }) {
-  const { id } = await params;
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+  const { id, locale } = await params;
 
   const product = getProductById(id);
   if (!product) return { title: t(locale, "product.notFound") };

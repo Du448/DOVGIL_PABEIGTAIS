@@ -7,20 +7,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   reactCompiler: true,
   outputFileTracingRoot: __dirname,
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          // Kept for Inbank compatibility; harmless for other routes.
-          {
-            key: "Referrer-Policy",
-            value: "origin",
-          },
-        ],
-      },
-    ];
-  },
   images: {
     remotePatterns: [
       {

@@ -11,10 +11,48 @@ import MagneticButton from "@/components/anim/MagneticButton";
 import HomeSpotlightCarousel from "@/components/HomeSpotlightCarousel";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ArrowRight, ChevronRight, Phone } from "lucide-react";
-import { headers } from "next/headers";
-import { getLocaleFromPathname, withLocaleHref, t } from "@/lib/i18n";
+import { withLocaleHref, t } from "@/lib/i18n";
 
-export const dynamic = "force-dynamic";
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
+
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://dovgil.lv";
+  const pathLt = "/lt";
+  const pathLv = "/lv";
+  const pathEn = "/en";
+  const title =
+    locale === "lv"
+      ? "DOVGIL — ārdurvis un iekšdurvis Latvijā"
+      : locale === "en"
+        ? "DOVGIL — exterior and interior doors in Latvia"
+        : "DOVGIL — lauko ir vidaus durys Latvijoje";
+  const description =
+    locale === "lv"
+      ? "DOVGIL: ārdurvis un iekšdurvis, profesionāla montāža un piegāde visā Latvijā. Plašs sortiments, konsultācijas un garantija."
+      : locale === "en"
+        ? "DOVGIL: exterior and interior doors, professional installation and delivery across Latvia. Wide assortment, consultations and warranty."
+        : "DOVGIL: lauko ir vidaus durys, profesionalus montavimas ir pristatymas visoje Latvijoje. Platus asortimentas, konsultacijos ir garantija.";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      siteName: "DOVGIL",
+      locale: locale === "lv" ? "lv_LV" : locale === "en" ? "en_US" : "lt_LT",
+      type: "website",
+    },
+    alternates: {
+      canonical: `${base}${locale === "lv" ? pathLv : locale === "en" ? pathEn : pathLt}`,
+      languages: {
+        lt: `${base}${pathLt}`,
+        lv: `${base}${pathLv}`,
+        en: `${base}${pathEn}`,
+      },
+    },
+  };
+}
 
 function formatSpotlightPrice(locale, price) {
   return new Intl.NumberFormat(locale === "lv" ? "lv-LV" : locale === "en" ? "en-IE" : "lt-LT", {
@@ -80,10 +118,8 @@ function getSpotlightContent(product, locale) {
   }
 }
 
-export default async function Home() {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export default async function Home({ params }) {
+  const { locale } = await params;
 
   const categoryImages = {
     "ardurvis-dzivoklim": {

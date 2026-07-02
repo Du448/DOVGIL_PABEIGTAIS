@@ -1,10 +1,10 @@
-import "./globals.css";
+import "../globals.css";
 import { Inter } from "next/font/google";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import { notFound } from "next/navigation";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { headers } from "next/headers";
-import { getLocaleFromPathname, locales } from "@/lib/i18n";
+import { locales } from "@/lib/i18n";
 import { CompareProvider } from "@/lib/compare";
 import CompareBar from "@/components/CompareBar";
 import { RfqProvider } from "@/lib/rfq";
@@ -16,12 +16,16 @@ import AnalyticsLoader from "@/components/AnalyticsLoader";
 // Fonts via next/font with display swap
 const inter = Inter({ subsets: ["latin"], display: "swap", weight: ["400", "500", "600", "700"] });
 
-export const dynamic = "force-dynamic";
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
 
-export async function generateMetadata() {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
+
+  if (!locales.includes(locale)) {
+    notFound();
+  }
 
   const title =
     locale === "lv"
@@ -55,10 +59,12 @@ export async function generateMetadata() {
   };
 }
 
-export default async function RootLayout({ children }) {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export default async function RootLayout({ children, params }) {
+  const { locale } = await params;
+
+  if (!locales.includes(locale)) {
+    notFound();
+  }
 
   return (
     <html lang={locale}>

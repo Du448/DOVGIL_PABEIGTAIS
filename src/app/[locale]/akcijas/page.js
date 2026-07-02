@@ -1,19 +1,16 @@
 import ProductCard from "@/components/ProductCard";
 import { products } from "@/data/products";
-import { headers } from "next/headers";
-import { getLocaleFromPathname, t } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
-export async function generateMetadata() {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
 
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://dovgil.lv";
-  const pathLt = "/lt/jaunumi";
-  const pathLv = "/lv/jaunumi";
-  const pathEn = "/en/jaunumi";
-  const title = `${t(locale, "pages.news.title")} | DOVGIL`;
-  const description = t(locale, "pages.news.description");
+  const pathLt = "/lt/akcijas";
+  const pathLv = "/lv/akcijas";
+  const pathEn = "/en/akcijas";
+  const title = `${t(locale, "pages.deals.title")} | DOVGIL`;
+  const description = t(locale, "pages.deals.description");
 
   return {
     title,
@@ -32,15 +29,13 @@ export async function generateMetadata() {
   };
 }
 
-export default async function JaunumiPage() {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export default async function AkcijasPage({ params }) {
+  const { locale } = await params;
 
-  const news = products.filter((p) => p.isNew === true);
+  const discounted = products.filter((p) => p.oldPrice != null);
 
-  const title = t(locale, "pages.news.title");
-  const description = t(locale, "pages.news.description");
+  const title = t(locale, "pages.deals.title");
+  const description = t(locale, "pages.deals.description");
 
   return (
     <main>
@@ -54,7 +49,7 @@ export default async function JaunumiPage() {
       <section>
         <div className="container py-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {news.map((p) => (
+            {discounted.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>

@@ -1,13 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Layers, Wrench, ShieldCheck, MessageCircle } from "lucide-react";
-import { headers } from "next/headers";
-import { getLocaleFromPathname, withLocaleHref, t } from "@/lib/i18n";
+import { withLocaleHref, t } from "@/lib/i18n";
 
-export async function generateMetadata() {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
 
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://dovgil.lv";
   const pathLt = "/lt/par-mums";
@@ -38,10 +35,8 @@ export async function generateMetadata() {
   };
 }
 
-export default async function AboutPage() {
-  const h = await headers();
-  const pathname = h.get("x-invoke-path") || "/";
-  const locale = getLocaleFromPathname(pathname);
+export default async function AboutPage({ params }) {
+  const { locale } = await params;
 
   return (
     <main>
